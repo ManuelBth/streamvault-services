@@ -1,0 +1,174 @@
+# StreamVault VM-3 Network Services
+# docker-compose.yml
+
+services:
+  # ─────────────────────────────────────────────────────────
+  # DNS - dnsmasq para resolución de nombres interna
+  # ─────────────────────────────────────────────────────────
+  dns:
+    image: jessestuart/dnsmasq:latest
+    container_name: streamvault-dns
+    hostname: ns1.streamvault.local
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    volumes:
+      - ./infrastructure/dns/dnsmasq.conf:/etc/dnsmasq.conf:ro
+      - ./infrastructure/dns/dnsmasq.hosts:/etc/hosts.dnsmasq:ro
+    environment:
+      - DNSMASQ_USER=root
+    restart: unless-stopped
+    networks:
+      - streamvault
+
+  # ─────────────────────────────────────────────────────────
+  # PostgreSQL - Base de datos relacional
+  # ─────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: streamvault-postgres
+    hostname: db.streamvault.local
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infrastructure/database/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./infrastructure/database/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - streamvault
+
+  # ─────────────────────────────────────────────────────────
+  # MinIO - Almacenamiento de objetos (videos y thumbnails)
+  # ─────────────────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: streamvault-minio
+    hostname: minio.streamvault.local
+    ports:
+      - "9000:9000"  # S3 API
+      - "9001:9001"  # Console Web
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_DOMAIN=streamvault.local
+    volumes:
+      - miniodata:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - streamvault
+
+  # ─────────────────────────────────────────────────────────
+  # Dovecot - Servidor IMAP (buzones de correo)
+  # ─────────────────────────────────────────────────────────
+  dovecot:
+    image: dovecot/dovecot:latest
+    container_name: streamvault-dovecot
+    hostname: imap.streamvault.local
+    ports:
+      - "143:143"
+      - "993:993"
+    volumes:
+      - maildata:/var/mail/streamvault
+      - ./infrastructure/mail/dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro
+      - ./infrastructure/mail/dovecot/passwd:/etc/dovecot/passwd:ro
+      - ./infrastructure/mail/dovecot/dovecot-sql.conf.ext:/etc/dovecot/dovecot-sql.conf.ext:ro
+    restart: unless-stopped
+    networks:
+      - streamvault
+    depends_on:
+      - postfix
+
+  # ─────────────────────────────────────────────────────────
+  # Postfix - Servidor SMTP (recepciones de emails)
+  # ─────────────────────────────────────────────────────────
+  postfix:
+    image: boky/postfix:latest
+    container_name: streamvault-postfix
+    hostname: mail.streamvault.local
+    ports:
+      - "25:25"
+    environment:
+      - ALLOWED_SENDER_DOMAINS=streamvault.local
+      - RELAYHOST=
+      - POSTFIX_myhostname=mail.streamvault.local
+      - POSTFIX_mydomain=streamvault.local
+      - POSTFIX_mynetworks=${POSTFIX_MYNETWORKS}
+      - POSTFIX_smtp_hostname=mail.streamvault.local
+    volumes:
+      - maildata:/var/mail/streamvault
+      - ./infrastructure/mail/postfix/main.cf:/etc/postfix/main.cf:ro
+      - ./infrastructure/mail/postfix/vmailbox:/etc/postfix/vmailbox:ro
+      - ./infrastructure/mail/postfix/virtual:/etc/postfix/virtual:ro
+      - ./infrastructure/mail/postfix/password:/etc/postfix/sasl_passwd:ro
+    restart: unless-stopped
+    networks:
+      - streamvault
+    depends_on:
+      - dovecot
+
+  # ─────────────────────────────────────────────────────────
+  # RoundCube - Webmail (interfaz web para correos)
+  # ─────────────────────────────────────────────────────────
+  roundcube:
+    image: roundcube/roundcubemail:latest
+    container_name: streamvault-webmail
+    hostname: webmail.streamvault.local
+    ports:
+      - "8080:80"
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=imap://dovecot
+      - ROUNDCUBEMAIL_DEFAULT_PORT=143
+      - ROUNDCUBEMAIL_SMTP_SERVER=smtp://postfix
+      - ROUNDCUBEMAIL_SMTP_PORT=25
+      - ROUNDCUBEMAIL_DB_TYPE=pgsql
+      - ROUNDCUBEMAIL_DB_DSN=pgsql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - ROUNDCUBEMAIL_DEFAULT_DOMAIN=streamvault.local
+    volumes:
+      - roundcube_data:/var/www/html
+      - ./infrastructure/mail/roundcube/config.php:/var/www/html/config/config.inc.php:ro
+    restart: unless-stopped
+    networks:
+      - streamvault
+    depends_on:
+      - postgres
+      - dovecot
+      - postfix
+
+# ─────────────────────────────────────────────────────────
+# Volúmenes persistentes
+# ─────────────────────────────────────────────────────────
+volumes:
+  pgdata:
+    driver: local
+  miniodata:
+    driver: local
+  maildata:
+    driver: local
+  roundcube_data:
+    driver: local
+
+# ─────────────────────────────────────────────────────────
+# Red interna
+# ─────────────────────────────────────────────────────────
+networks:
+  streamvault:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

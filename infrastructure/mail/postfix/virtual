@@ -1,0 +1,11 @@
+# Virtual Alias Mapping
+# Format: alias@domain    destination@domain
+# Redirects incoming mail to other addresses
+
+# Admin aliases
+postmaster@streamvault.local      admin@streamvault.local
+webmaster@streamvault.local       admin@streamvault.local
+abuse@streamvault.local           admin@streamvault.local
+
+# Add custom aliases here
+# After editing, run: postmap /etc/postfix/virtual && postfix reload

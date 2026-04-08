@@ -1,0 +1,9 @@
+# Postfix SASL Password Mappings
+# Format: host:port    username:password
+# Used for SMTP authentication (if needed)
+
+# Example for external relay (not used in closed network):
+# [smtp.external.com]:587    username:password
+
+# For local delivery, no external relay configured
+# This file is required even if empty for postfix to start

@@ -1,0 +1,62 @@
+# Postfix Main Configuration
+# Mail Transfer Agent for StreamVault
+
+# ─────────────────────────────────────────────────────────
+# Server Identity
+# ─────────────────────────────────────────────────────────
+myhostname = mail.streamvault.local
+mydomain = streamvault.local
+myorigin = $mydomain
+mydestination = $myhostname, $mydomain, localhost.$mydomain, localhost
+
+# ─────────────────────────────────────────────────────────
+# Network Settings
+# ─────────────────────────────────────────────────────────
+inet_interfaces = all
+inet_protocols = ipv4
+mynetworks = 192.168.1.0/24, 127.0.0.0/8
+
+# ─────────────────────────────────────────────────────────
+# Mailbox Settings
+# ─────────────────────────────────────────────────────────
+home_mailbox = 
+mailbox_command = 
+
+# Virtual mailbox settings (Dovecot LMTP)
+virtual_transport = lmtp:unix:private/dovecot-lmtp
+virtual_mailbox_domains = streamvault.local
+virtual_mailbox_maps = hash:/etc/postfix/vmailbox
+virtual_alias_maps = hash:/etc/postfix/virtual
+virtual_minimum_uid = 100
+
+# ─────────────────────────────────────────────────────────
+# Size Limits
+# ─────────────────────────────────────────────────────────
+message_size_limit = 10240000  # 10MB max email
+mailbox_size_limit = 51200000  # 50MB max mailbox
+
+# ─────────────────────────────────────────────────────────
+# Relay Settings (none - closed network)
+# ─────────────────────────────────────────────────────────
+relayhost = 
+smtp_use_tls = no
+
+# ─────────────────────────────────────────────────────────
+# Security
+# ─────────────────────────────────────────────────────────
+smtpd_recipient_restrictions = permit_mynetworks, reject_unauth_destination
+smtpd_client_restrictions = permit_mynetworks
+smtpd_delay_reject = yes
+smtpd_helo_required = yes
+
+# ─────────────────────────────────────────────────────────
+# Logging
+# ─────────────────────────────────────────────────────────
+maillog_file = /var/log/postfix.log
+maillog_timestamp_prefix =
+
+# ─────────────────────────────────────────────────────────
+# Debug (disable in production)
+# ─────────────────────────────────────────────────────────
+# debug_peer_list = 192.168.1.20
+# debug_peer_level = 3

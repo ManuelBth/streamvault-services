@@ -1,0 +1,17 @@
+# Local hosts for StreamVault internal network
+# Format: IP_address hostname [hostname ...]
+
+# VM-1 - Frontend (Angular + NGINX)
+192.168.1.10 streamvault.local streamvault
+
+# VM-2 - Backend (Spring Boot)
+192.168.1.20 api.streamvault.local api
+192.168.1.20 ws.streamvault.local ws
+
+# VM-3 - Network Services
+192.168.1.30 mail.streamvault.local mail
+192.168.1.30 imap.streamvault.local imap
+192.168.1.30 db.streamvault.local db
+192.168.1.30 minio.streamvault.local minio
+192.168.1.30 webmail.streamvault.local webmail
+192.168.1.30 ns1.streamvault.local ns1

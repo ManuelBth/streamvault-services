@@ -1,0 +1,21 @@
+# Dovecot SQL Configuration
+# Used for RoundCube integration
+
+# Driver
+driver = pgsql
+
+# Connection string (will be overridden by environment in container)
+connect = host=postgres dbname=streamvault user=streamvault password=streamvault2025
+
+# Password query
+password_query = SELECT username AS user, domain, password FROM mailbox WHERE username = '%u' AND active = '1'
+
+# User query
+user_query = SELECT username AS user, '5000' AS uid, '5000' AS gid, '/var/mail/streamvault/%u' AS home FROM mailbox WHERE username = '%u' AND active = '1'
+
+# Default password scheme
+default_pass_scheme = PLAIN
+
+# Note: For now we're using file-based auth (passwd)
+# This SQL config is for future database-driven auth
+# when we migrate from file-based to SQL-based user management

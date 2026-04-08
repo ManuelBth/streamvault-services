@@ -1,0 +1,11 @@
+# Virtual Mailbox Mapping
+# Format: email@domain    domain/user/
+# Maps email addresses to Maildir paths
+
+# System accounts
+noreply@streamvault.local        streamvault.local/noreply/
+admin@streamvault.local          streamvault.local/admin/
+postmaster@streamvault.local      streamvault.local/admin/
+
+# Add new users here when they register in the platform
+# After editing, run: postmap /etc/postfix/vmailbox && postfix reload
