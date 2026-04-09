@@ -4,8 +4,8 @@
 # ─────────────────────────────────────────────────────────
 # Server Identity
 # ─────────────────────────────────────────────────────────
-myhostname = mail.streamvault.local
-mydomain = streamvault.local
+myhostname = mail.streamvault.com
+mydomain = streamvault.com
 myorigin = $mydomain
 mydestination = $myhostname, $mydomain, localhost.$mydomain, localhost
 
@@ -24,7 +24,7 @@ mailbox_command =
 
 # Virtual mailbox settings (Dovecot LMTP)
 virtual_transport = lmtp:unix:private/dovecot-lmtp
-virtual_mailbox_domains = streamvault.local
+virtual_mailbox_domains = streamvault.com
 virtual_mailbox_maps = hash:/etc/postfix/vmailbox
 virtual_alias_maps = hash:/etc/postfix/virtual
 virtual_minimum_uid = 100

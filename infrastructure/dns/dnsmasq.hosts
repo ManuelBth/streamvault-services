@@ -1,17 +1,23 @@
 # Local hosts for StreamVault internal network
 # Format: IP_address hostname [hostname ...]
+# NOTE: IPs to be defined - update when network topology is defined
 
 # VM-1 - Frontend (Angular + NGINX)
-192.168.1.10 streamvault.local streamvault
+# 192.168.x.x streamvault.com www.streamvault.com
 
 # VM-2 - Backend (Spring Boot)
-192.168.1.20 api.streamvault.local api
-192.168.1.20 ws.streamvault.local ws
+# 192.168.x.x api.streamvault.com api
+# 192.168.x.x ws.streamvault.com ws
 
 # VM-3 - Network Services
-192.168.1.30 mail.streamvault.local mail
-192.168.1.30 imap.streamvault.local imap
-192.168.1.30 db.streamvault.local db
-192.168.1.30 minio.streamvault.local minio
-192.168.1.30 webmail.streamvault.local webmail
-192.168.1.30 ns1.streamvault.local ns1
+# 192.168.x.x mail.streamvault.com mail
+# 192.168.x.x imap.streamvault.com imap
+# 192.168.x.x db.streamvault.com db
+# 192.168.x.x minio.streamvault.com minio
+# 192.168.x.x webmail.streamvault.com webmail
+# 192.168.x.x ns1.streamvault.com ns1
+
+# Example with specific IPs (uncomment and modify as needed):
+# 192.168.1.10 streamvault.com www.streamvault.com
+# 192.168.1.20 api.streamvault.com ws.streamvault.com
+# 192.168.1.30 mail.streamvault.com imap.streamvault.com db.streamvault.com minio.streamvault.com webmail.streamvault.com ns1.streamvault.com

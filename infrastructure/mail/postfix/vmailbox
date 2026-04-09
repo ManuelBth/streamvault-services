@@ -3,9 +3,9 @@
 # Maps email addresses to Maildir paths
 
 # System accounts
-noreply@streamvault.local        streamvault.local/noreply/
-admin@streamvault.local          streamvault.local/admin/
-postmaster@streamvault.local      streamvault.local/admin/
+noreply@streamvault.com        streamvault.com/noreply/
+admin@streamvault.com          streamvault.com/admin/
+postmaster@streamvault.com      streamvault.com/admin/
 
 # Add new users here when they register in the platform
 # After editing, run: postmap /etc/postfix/vmailbox && postfix reload

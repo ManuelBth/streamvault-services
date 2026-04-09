@@ -8,7 +8,7 @@ services:
   dns:
     image: jessestuart/dnsmasq:latest
     container_name: streamvault-dns
-    hostname: ns1.streamvault.local
+    hostname: ns1.streamvault.com
     ports:
       - "53:53/tcp"
       - "53:53/udp"
@@ -18,8 +18,7 @@ services:
     environment:
       - DNSMASQ_USER=root
     restart: unless-stopped
-    networks:
-      - streamvault
+    network_mode: host
 
   # ─────────────────────────────────────────────────────────
   # PostgreSQL - Base de datos relacional
@@ -27,7 +26,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: streamvault-postgres
-    hostname: db.streamvault.local
+    hostname: db.streamvault.com
     ports:
       - "5432:5432"
     environment:
@@ -53,14 +52,14 @@ services:
   minio:
     image: minio/minio:latest
     container_name: streamvault-minio
-    hostname: minio.streamvault.local
+    hostname: minio.streamvault.com
     ports:
       - "9000:9000"  # S3 API
       - "9001:9001"  # Console Web
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - MINIO_DOMAIN=streamvault.local
+      - MINIO_DOMAIN=streamvault.com
     volumes:
       - miniodata:/data
     command: server /data --console-address ":9001"
@@ -79,7 +78,7 @@ services:
   dovecot:
     image: dovecot/dovecot:latest
     container_name: streamvault-dovecot
-    hostname: imap.streamvault.local
+    hostname: imap.streamvault.com
     ports:
       - "143:143"
       - "993:993"
@@ -100,16 +99,16 @@ services:
   postfix:
     image: boky/postfix:latest
     container_name: streamvault-postfix
-    hostname: mail.streamvault.local
+    hostname: mail.streamvault.com
     ports:
       - "25:25"
     environment:
-      - ALLOWED_SENDER_DOMAINS=streamvault.local
+      - ALLOWED_SENDER_DOMAINS=streamvault.com
       - RELAYHOST=
-      - POSTFIX_myhostname=mail.streamvault.local
-      - POSTFIX_mydomain=streamvault.local
+      - POSTFIX_myhostname=mail.streamvault.com
+      - POSTFIX_mydomain=streamvault.com
       - POSTFIX_mynetworks=${POSTFIX_MYNETWORKS}
-      - POSTFIX_smtp_hostname=mail.streamvault.local
+      - POSTFIX_smtp_hostname=mail.streamvault.com
     volumes:
       - maildata:/var/mail/streamvault
       - ./infrastructure/mail/postfix/main.cf:/etc/postfix/main.cf:ro
@@ -128,7 +127,7 @@ services:
   roundcube:
     image: roundcube/roundcubemail:latest
     container_name: streamvault-webmail
-    hostname: webmail.streamvault.local
+    hostname: webmail.streamvault.com
     ports:
       - "8080:80"
     environment:
@@ -138,7 +137,7 @@ services:
       - ROUNDCUBEMAIL_SMTP_PORT=25
       - ROUNDCUBEMAIL_DB_TYPE=pgsql
       - ROUNDCUBEMAIL_DB_DSN=pgsql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - ROUNDCUBEMAIL_DEFAULT_DOMAIN=streamvault.local
+      - ROUNDCUBEMAIL_DEFAULT_DOMAIN=streamvault.com
     volumes:
       - roundcube_data:/var/www/html
       - ./infrastructure/mail/roundcube/config.php:/var/www/html/config/config.inc.php:ro

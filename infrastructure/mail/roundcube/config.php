@@ -27,8 +27,8 @@ $config['smtp_auth_type'] = 'PLAIN';
 // ─────────────────────────────────────────────────────────
 // Default Settings
 // ─────────────────────────────────────────────────────────
-$config['default_domain'] = 'streamvault.local';
-$config['mail_domain'] = 'streamvault.local';
+$config['default_domain'] = 'streamvault.com';
+$config['mail_domain'] = 'streamvault.com';
 
 $config['des_key'] = 'rcmail-!24-byte-des-key-00!';
 

@@ -3,9 +3,9 @@
 # Redirects incoming mail to other addresses
 
 # Admin aliases
-postmaster@streamvault.local      admin@streamvault.local
-webmaster@streamvault.local       admin@streamvault.local
-abuse@streamvault.local           admin@streamvault.local
+postmaster@streamvault.com      admin@streamvault.com
+webmaster@streamvault.com       admin@streamvault.com
+abuse@streamvault.com           admin@streamvault.com
 
 # Add custom aliases here
 # After editing, run: postmap /etc/postfix/virtual && postfix reload
