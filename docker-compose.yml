@@ -126,7 +126,7 @@ services:
     container_name: streamvault-webmail
     hostname: webmail.streamvault.com
     ports:
-      - "8080:80"
+      - "8082:80"
     environment:
       - ROUNDCUBEMAIL_DEFAULT_HOST=imap://dovecot
       - ROUNDCUBEMAIL_DEFAULT_PORT=143
