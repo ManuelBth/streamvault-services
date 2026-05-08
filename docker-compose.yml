@@ -9,9 +9,8 @@ services:
     image: jpillora/dnsmasq:latest
     container_name: streamvault-dns
     hostname: ns1.streamvault.com
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+    # Nota: con network_mode: host no se mapean puertos
+    # El DNS escucha directamente en el puerto 53 del host
     volumes:
       - ./infrastructure/dns/dnsmasq.conf:/etc/dnsmasq.conf:ro
       - ./infrastructure/dns/dnsmasq.hosts:/etc/hosts.dnsmasq:ro
