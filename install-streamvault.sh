@@ -138,17 +138,26 @@ fi
 # ─────────────────────────────────────────────────────────────────────────────
 print_header "Verificando Docker"
 
-# Agregar usuario actual al grupo docker (si no es root)
-if [[ $SUDO_USER ]]; then
-    usermod -aG docker $SUDO_USER
-    print_info "Usuario $SUDO_USER agregado al grupo docker"
+# Agregar usuario no-root al grupo docker
+# El usuario real (no root) necesita acceso a Docker
+REAL_USER=${SUDO_USER:-$(whoami)}
+if [[ "$REAL_USER" != "root" ]]; then
+    usermod -aG docker $REAL_USER 2>/dev/null || true
+    print_info "Usuario $REAL_USER agregado al grupo docker"
+    print_warning "IMPORTANT: Cerrá sesión y volvé a abrirla para aplicar los permisos"
+    print_warning "O ejecutá: newgrp docker"
 fi
 
-# Verificar que Docker funciona
+# Verificar que Docker funciona (con sudo o sin él)
 if docker run --rm hello-world &> /dev/null; then
     print_success "Docker está funcionando correctamente"
 else
-    print_warning "Docker puede tener problemas. Verifica con: docker ps"
+    print_warning "Docker no funciona sin sudo, intentando con sudo..."
+    if sudo docker run --rm hello-world &> /dev/null; then
+        print_success "Docker funciona con sudo"
+    else
+        print_error "Docker tiene problemas. Verifica con: sudo docker ps"
+    fi
 fi
 
 # Verificar docker compose
