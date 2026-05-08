@@ -6,7 +6,7 @@ services:
   # DNS - dnsmasq para resolución de nombres interna
   # ─────────────────────────────────────────────────────────
   dns:
-    image: jessestuart/dnsmasq:latest
+    image: jpillora/dnsmasq:latest
     container_name: streamvault-dns
     hostname: ns1.streamvault.com
     ports:
