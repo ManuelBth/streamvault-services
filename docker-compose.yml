@@ -73,27 +73,6 @@ services:
       - streamvault
 
   # ─────────────────────────────────────────────────────────
-  # Dovecot - Servidor IMAP (buzones de correo)
-  # ─────────────────────────────────────────────────────────
-  dovecot:
-    image: dovecot/dovecot:latest
-    container_name: streamvault-dovecot
-    hostname: imap.streamvault.com
-    ports:
-      - "143:143"
-      - "993:993"
-    volumes:
-      - maildata:/var/mail/streamvault
-      - ./infrastructure/mail/dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro
-      - ./infrastructure/mail/dovecot/passwd:/etc/dovecot/passwd:ro
-      - ./infrastructure/mail/dovecot/dovecot-sql.conf.ext:/etc/dovecot/dovecot-sql.conf.ext:ro
-    restart: unless-stopped
-    networks:
-      - streamvault
-    depends_on:
-      - postfix
-
-  # ─────────────────────────────────────────────────────────
   # Postfix - Servidor SMTP (recepciones de emails)
   # ─────────────────────────────────────────────────────────
   postfix:
@@ -118,8 +97,27 @@ services:
     restart: unless-stopped
     networks:
       - streamvault
+
+  # ─────────────────────────────────────────────────────────
+  # Dovecot - Servidor IMAP (buzones de correo)
+  # ─────────────────────────────────────────────────────────
+  dovecot:
+    image: dovecot/dovecot:latest
+    container_name: streamvault-dovecot
+    hostname: imap.streamvault.com
+    ports:
+      - "143:143"
+      - "993:993"
+    volumes:
+      - maildata:/var/mail/streamvault
+      - ./infrastructure/mail/dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro
+      - ./infrastructure/mail/dovecot/passwd:/etc/dovecot/passwd:ro
+      - ./infrastructure/mail/dovecot/dovecot-sql.conf.ext:/etc/dovecot/dovecot-sql.conf.ext:ro
+    restart: unless-stopped
+    networks:
+      - streamvault
     depends_on:
-      - dovecot
+      - postfix
 
   # ─────────────────────────────────────────────────────────
   # RoundCube - Webmail (interfaz web para correos)
@@ -145,9 +143,12 @@ services:
     networks:
       - streamvault
     depends_on:
-      - postgres
-      - dovecot
-      - postfix
+      postgres:
+        condition: service_healthy
+      dovecot:
+        condition: service_started
+      postfix:
+        condition: service_started
 
 # ─────────────────────────────────────────────────────────
 # Volúmenes persistentes
