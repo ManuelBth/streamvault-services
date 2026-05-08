@@ -74,20 +74,37 @@ if command -v docker &> /dev/null; then
 else
     print_info "Instalando Docker..."
 
+    # Linux Mint y otros basados en Ubuntu usan el código de Ubuntu
     case $OS in
-        ubuntu|debian)
+        ubuntu|debian|mint|linuxmint)
             # Actualizar repositorios
             apt update -y
 
             # Instalar dependencias
             apt install -y ca-certificates curl gnupg lsb-release
 
+            # Linux Mint usa repositorio de Ubuntu
+            # Determinar versión base para el repositorio
+            if [[ "$OS" == "mint" ]] || [[ "$OS" == "linuxmint" ]]; then
+                # Obtener versión base de Ubuntu desde /etc/os-release
+                if [[ -f /etc/upstream-release/lsb-release ]]; then
+                    . /etc/upstream-release/lsb-release
+                    DISTRO_CODENAME="${DISTRIB_CODENAME}"
+                else
+                    # Por defecto usar nombre de versión de lsb-release
+                    DISTRO_CODENAME=$(lsb_release -cs)
+                fi
+                print_info "Linux Mint detectado - usando repositorio Ubuntu: $DISTRO_CODENAME"
+            else
+                DISTRO_CODENAME=$(lsb_release -cs)
+            fi
+
             # Agregar clave GPG de Docker
             mkdir -p /etc/apt/keyrings
-            curl -fsSL https://download.docker.com/linux/$OS/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-            # Agregar repositorio
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$OS $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+            # Agregar repositorio (siempre usar ubuntu para mint/debian)
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${DISTRO_CODENAME} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
             # Instalar Docker
             apt update -y
@@ -105,6 +122,10 @@ else
             ;;
         *)
             print_error "Sistema operativo no soportado: $OS"
+            echo ""
+            echo "Sistemas soportados:"
+            echo "  - Ubuntu / Debian / Linux Mint"
+            echo "  - CentOS / Fedora / RHEL"
             exit 1
             ;;
     esac
